@@ -1,0 +1,27 @@
+<Project>
+    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+    <PropertyGroup>
+        <CoreBuildDependsOn>
+            $(CoreBuildDependsOn);
+            NativeBuild
+        </CoreBuildDependsOn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- We're just doing this to bring the ILCompiler package down to disk. -->
+        <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-27702-01" ExcludeAssets="Build" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <NoStandardLibraries>true</NoStandardLibraries>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+        <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+        <RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
+        <IlcRuntimePackageName Condition="'$(RuntimeIdentifier)' != ''">runtime.$(RuntimeIdentifier).Microsoft.DotNet.ILCompiler</IlcRuntimePackageName>
+        <TargetExt>.msil</TargetExt>
+        <UseAppHost>false</UseAppHost>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+</Project>

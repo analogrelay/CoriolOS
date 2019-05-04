@@ -1,0 +1,13 @@
+﻿<Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\CoreRT.Freestanding.Sdk\build\Sdk.props" />
+
+  <PropertyGroup>
+    <SystemModuleName>CoreRTest</SystemModuleName>
+    <OutputType>Exe</OutputType>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\CoreRT.Freestanding.Sdk\build\Sdk.targets" />
+</Project>

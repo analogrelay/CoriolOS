@@ -1,0 +1,45 @@
+<Project>
+    <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+    <Target Name="AfterBuild" DependsOnTargets="NativeBuild" />
+
+    <Target Name="NativeBuild" DependsOnTargets="NativeLink">
+    </Target>
+
+    <Target Name="FindIlcRuntimePackage" DependsOnTargets="RunResolvePackageDependencies">
+        <PropertyGroup>
+            <IlcRuntimePackageName Condition="'$(RuntimeIdentifier)' != ''">runtime.$(RuntimeIdentifier).Microsoft.DotNet.ILCompiler</IlcRuntimePackageName>
+            <IlcRuntimePackagePath Condition="'%(PackageDefinitions.Name)' == '$(IlcRuntimePackageName)'">%(PackageDefinitions.ResolvedPath)\</IlcRuntimePackagePath>
+            <IlcCmd>$(IlcRuntimePackagePath)tools\ilc.exe</IlcCmd>
+        </PropertyGroup>
+    </Target>
+
+    <Target Name="BuildIlcArgs" DependsOnTargets="FindIlcRuntimePackage">
+        <PropertyGroup>
+            <NativeTargetExt Condition="'$(NativeTargetExt)' == '' And '$(OutputType)' == 'Exe'">.exe</NativeTargetExt>
+            <NativeTargetExt Condition="'$(NativeTargetExt)' == '' And '$(OutputType)' != 'Exe'">.dll</NativeTargetExt>
+            <NativeTargetName Condition="'$(NativeTargetName)' ==''">$(TargetName)</NativeTargetName>
+            <NativeTargetDir Condition="'$(NativeTargetDir)' ==''">$(TargetDir)</NativeTargetDir>
+            <IntermediateOutputExt>.obj</IntermediateOutputExt>
+            <IntermediateOutput>$(IntermediateOutputPath)$(NativeTargetName)$(IntermediateOutputExt)</IntermediateOutput>
+            <NativeTargetPath>$(NativeTargetDir)$(NativeTargetName)$(NativeTargetExt)</NativeTargetPath>
+            <MapFileOutput>$(IntermediateOutputPath)$(NativeTargetName).map</MapFileOutput>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <IlcArg Include="&quot;%(IntermediateAssembly.FullPath)&quot;" />
+            <IlcArg Include="-o &quot;$(IntermediateOutput)&quot;" />
+            <IlcArg Include="-g" /> <!-- Debug Info -->
+            <IlcArg Include="--systemmodule &quot;$(SystemModuleName)&quot;" Condition="'$(SystemModuleName)' != ''" />
+            <IlcArg Include="--map &quot;$(MapFileOutput)&quot;" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="NativeCompile" DependsOnTargets="BuildIlcArgs">
+        <Exec Command="$(IlcCmd) @(IlcArg,' ')" />
+    </Target>
+
+    <Target Name="NativeLink" DependsOnTargets="NativeCompile">
+        <Exec Command="link &quot;$(IntermediateOutput)&quot; /out:&quot;$(NativeTargetPath)&quot; /subsystem:console /entry:__managed__Main kernel32.lib /merge:.modules=.pdata /incremental:no" />
+    </Target>
+</Project>
